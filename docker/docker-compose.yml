@@ -1,0 +1,43 @@
+#主な参考：https://note.com/tomatist/n/na1bd7cd1bf33
+#起動するときは.env.dev.sampleを.env.devにする
+services:
+ web: #このコンテナが理解できてない
+   build: ./ #Dockerfileでビルドするので、Dockerfileのディレクトリを指定
+   command: python manage.py runserver 0.0.0.0:8000
+   volumes:
+     - ./app/:/usr/src/app/ #コンテナ内のデータをホストマシンへ保存（ホストディレクトリ : コンテナ内ディレクトリ）
+   ports:
+     - 8000:8000 #よくわからない
+   env_file:
+     - ./.env.dev
+ db:
+   image: postgres:17.2
+   container_name: postgres
+   volumes:
+     - postgres_data:/var/lib/postgresql/data/ #コンテナ内の/var/lib/postgresql/data/へDBファイルが保存され、それをpostgres_data（名前付きボリューム）に保存
+   env_file:
+     - ./.env.dev
+ gunicorn:
+    image: gunicorn:20.1.0 #このバージョンでいいか要確認
+    container_name: gunicorn
+    volumes:
+      - gunicorn:/var/run/gunicorn #コンテナ内の/var/run/gunicornへgunicornのデータが保存される（はず）
+    env_file: ./.env.dev
+    #stdin_openとttyはコンテナを起動したままにする。それぞれdocker runにおける-iオプション,-tオプションに対応する
+    stdin_open: true
+    tty: true
+ nginx:
+    image: nginx:1.17.7 #このバージョンでいいか要確認
+    container_name: nginx
+    depends_on:
+      - gunicorn #gunicornが先に起動する
+    ports:
+      - "80:80" #よくわからない
+    volumes:
+      - ./gunicorn.conf:/etc/nginx/conf.d/default.conf
+      - ./static_root:/var/www/mysite/static
+      - gunicorn:/var/run/gunicorn
+
+volumes:
+ postgres_data: #dockerのvolume管理ツール内にpostgres_data（名前付きボリューム）を作成
+ gunicorn:
