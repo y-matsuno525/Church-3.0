@@ -1,0 +1,36 @@
+#主な参考：https://note.com/tomatist/n/na1bd7cd1bf33
+#起動するときは.env.dev.sampleを.env.devにする
+services:
+
+ web: #このコンテナが理解できてない
+   build:
+    context: ./django_project #Dockerfileでビルドするので、Dockerfileのディレクトリを指定
+    dockerfile: Dockerfile
+   command: gunicorn project.wsgi:application --bind 0.0.0.0:8000 #gunicornでlocalhost:8000にサーバー立ち上げ
+   #volumes:
+   #  - ./app/:/usr/src/app/ #コンテナ内のデータをホストマシンへ保存（ホストディレクトリ : コンテナ内ディレクトリ）
+   expose:
+     - 8000 #exposeはホストから接続できない。nginxが80に送られたリクエストを8000へ転送するので、gunicornがそれを受け取るということ？
+   env_file:
+     - ./.env.dev
+   depends_on: #dbが先に起動する
+     - db 
+
+ db:
+   image: postgres:17.2
+   container_name: postgres
+   volumes:
+     - postgres_data:/var/lib/postgresql/data/ #コンテナ内の/var/lib/postgresql/data/へDBファイルが保存され、それをpostgres_data（名前付きボリューム）に保存
+   env_file:
+     - ./.env.dev
+    
+ nginx: 
+    build: ./nginx #このバージョンでいいか要確認
+    container_name: nginx
+    depends_on:
+      - web #gunicornが先に起動する
+    ports:
+      - "1317:80" #1317にリクエストを出すと、nginxがlistenしてる80に転送されるということ？
+
+volumes:
+ postgres_data: #dockerのvolume管理ツール内にpostgres_data（名前付きボリューム）を作成

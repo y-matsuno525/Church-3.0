@@ -8,5 +8,5 @@ then
    done
    echo "PostgreSQL started"
 fi
-#よくわからない
+#よくわからない（docker runで指定したコマンドを実行？）
 exec "$@"
