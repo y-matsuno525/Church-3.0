@@ -2,7 +2,7 @@
 #起動するときは.env.dev.sampleを.env.devにする
 services:
 
- web: #このコンテナが理解できてない
+ web: 
    build:
     context: ./django_project #Dockerfileでビルドするので、Dockerfileのディレクトリを指定
     dockerfile: Dockerfile
