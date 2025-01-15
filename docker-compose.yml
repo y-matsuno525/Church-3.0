@@ -9,6 +9,9 @@ services:
    command: gunicorn project.wsgi:application --bind 0.0.0.0:8000 #gunicornでlocalhost:8000にサーバー立ち上げ
    #volumes:
    #  - ./app/:/usr/src/app/ #コンテナ内のデータをホストマシンへ保存（ホストディレクトリ : コンテナ内ディレクトリ）
+   volumes:
+       - static_volume:/home/app/web/static
+       - media_volume:/home/app/web/media
    expose:
      - 8000 #exposeはホストから接続できない。nginxが80に送られたリクエストを8000へ転送するので、gunicornがそれを受け取るということ？
    env_file:
@@ -27,6 +30,9 @@ services:
  nginx: 
     build: ./nginx #このバージョンでいいか要確認
     container_name: nginx
+    volumes:
+     - static_volume:/home/app/web/static
+     - media_volume:/home/app/web/media
     depends_on:
       - web #gunicornが先に起動する
     ports:
@@ -34,3 +40,5 @@ services:
 
 volumes:
  postgres_data: #dockerのvolume管理ツール内にpostgres_data（名前付きボリューム）を作成
+ static_volume: #cssファイル、JSファイル、開発者がプロジェクトに追加した画像など
+ media_volume: #webアプリの利用者が、対象のwebアプリ内で画像やファイルをアップロードして、表示する画像など

@@ -134,3 +134,10 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+#NginxでStaticファイル(cssファイル、JSファイル、開発者がプロジェクトに追加した画像など)を扱う設定
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+#NginxでMediaファイル(webアプリの利用者が、対象のwebアプリ内で画像やファイルをアップロードして、表示する画像など)を扱う設定
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")

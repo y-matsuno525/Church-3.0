@@ -30,10 +30,12 @@ FROM python:3.13-alpine
 RUN mkdir -p /home/app
 #appグループとappユーザーを作り、appユーザーをappグループに入れる
 RUN addgroup -S app && adduser -S app -G app
-#パス設定とディレクトリ設定
+#パスとディレクトリの設定
 ENV HOME=/home/app
 ENV APP_HOME=/home/app/web
 RUN mkdir $APP_HOME
+RUN mkdir $APP_HOME/static
+RUN mkdir $APP_HOME/media
 WORKDIR $APP_HOME
 #パッケージリストを更新し、PostgreSQL用ライブラリをインストール
 RUN apk update && apk add libpq
