@@ -172,4 +172,3 @@ cython_debug/
 
 #追加
 .env.dev
-django_project/media/tmp/*
