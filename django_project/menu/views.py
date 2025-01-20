@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
-# Create your views here.
+#メニューを表示するだけ
 def menu(request):
-    return "test"
+
+    return render(request,"menu/menu.html")
