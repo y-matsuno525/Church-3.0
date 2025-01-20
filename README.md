@@ -6,6 +6,11 @@
 - PostgreSQL
 - Docker
 - AWS
+## セットアップ
+- ①コンテナの起動 docker-compose up -d --build
+- ②DBのマイグレート docker-compose exec web python manage.py migrate --noinpu
+- ③静的ファイルをnginxのstaticへ移動 docker-compose exec web python manage.py collectstatic --no-input --clear
+- ③コンテナの停止・削除 docker-compose down -v
 ## 着想元
 - 東浩紀『一般意思2.0』
   https://bookclub.kodansha.co.jp/product?item=0000212243
