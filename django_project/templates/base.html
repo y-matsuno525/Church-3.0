@@ -6,4 +6,25 @@
     <title>church 3.0</title>
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+    {% block extraheader %}{% endblock %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <!-- 上部ナビゲーションバー -->
+    <nav class="navbar navbar-expand flex-md-row navbar-dark bg-dark">
+        <div class="container d-flex justify-content-between">
+            <a href="/menu/" class="navbar-brand">church 3.0</a>
+        </div>
+    </nav>
+
     
+    
+            <!-- メインコンテンツエリア -->
+            <main class="col-md-10 ml-sm-auto px-4">
+                {% block main %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    
+</body>
+</html>
