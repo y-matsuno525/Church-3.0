@@ -4,6 +4,7 @@
 ## 技術スタック
 - Django(Python)
 - PostgreSQL
+- jQuery
 - Docker
 - AWS
 ## 着想元
