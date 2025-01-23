@@ -1,0 +1,19 @@
+<div>
+    <h3>Verse: {{ verse.text }}</h3>
+    <ul>
+        {% for post in forum_posts %}
+            <li>
+                <strong>{{ post.author }}</strong> ({{ post.created_at }}): 
+                <p>{{ post.content }}</p>
+            </li>
+        {% empty %}
+            <p>まだ投稿がありません。</p>
+        {% endfor %}
+    </ul>
+    <!-- 投稿フォームを追加する場合 -->
+    <form id="forum-form" method="POST" action="{% url 'menu:add_forum_post' %}">
+        <textarea name="content" placeholder="コメントを追加..." required></textarea>
+        <input type="hidden" name="verse_id" value="{{ verse.id }}">
+        <button type="submit">投稿</button>
+    </form>
+</div>

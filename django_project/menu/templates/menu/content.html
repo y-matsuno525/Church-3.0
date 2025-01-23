@@ -1,0 +1,16 @@
+<div>
+    <h2>{{ book.name }}</h2>
+    {% for chapter in chapter_data %}
+        <div class="chapter">
+            <h3>第 {{ chapter.chapter_number }} 章</h3>
+            <ul>
+                {% for verse in chapter.verses %}
+                    <li>
+                        <strong>{{ verse.verse_number }}</strong>: {{ verse.text }}
+                        <button class="forum-button" data-verse-id="{{ verse.id }}">掲示板を表示</button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+</div>
