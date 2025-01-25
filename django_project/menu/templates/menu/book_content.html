@@ -11,7 +11,7 @@
                         <button id="openQuestions_{{verse.id}}">Q&amp;A</button>
                         <script>
                             document.getElementById("openQuestions_{{verse.id}}").addEventListener("click",function(){
-                                window.open("{% url 'menu:verse_questions' %}?id={{verse.id}}", "_blank");
+                                window.open("{% url 'menu:get_verse_questions' %}?id={{verse.id}}", "_blank");
                             });
                         </script>
                     </li>
@@ -21,6 +21,8 @@
     {% endfor %}
 </div>
 
+
+
 <!--掲示板ポップアップ表示-->
 <div id="forum-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 1px solid black; padding: 20px; z-index: 1000;">
     <button class="close" style="position: absolute; top: 10px; right: 10px;">閉じる</button>
@@ -28,6 +30,8 @@
         <!-- 掲示板の内容がここに挿入される -->
     </div>
 </div>
+
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -37,9 +41,9 @@
 
             var verseId = $(this).data("verse-id"); // Verse IDを取得
 
-            // Ajaxリクエストを送信して掲示板内容を取得
+            // Ajaxリクエストを送信して注釈を取得
             $.ajax({
-                url: "{% url 'menu:get_verse_annotations' %}", // 掲示板ビューのURL
+                url: "{% url 'menu:get_verse_annotations' %}", // 注釈一覧のURL
                 method: "GET",
                 data: {
                     verse_id: verseId
@@ -47,13 +51,13 @@
                 success: function (response) {
                     if (response.html) {
                     
-                        // 新しいサブウィンドウを作成
+                        // サブウィンドウを作成
                         var windowName = "AnnotationsWindow_" + verseId;
                         var newWindow = window.open("", windowName, "width=600,height=400,scrollbars=yes,resizable=yes");
 
                         // サブウィンドウにHTMLを挿入
                         newWindow.document.open();
-                        newWindow.document.write(response.html); // response.html に完全なHTML構造を含む
+                        newWindow.document.write(response.html); // response.html は完全なHTML構造じゃないとだめ
                         newWindow.document.close();
                     } else {
                         alert("掲示板の内容を取得できませんでした。");
@@ -69,7 +73,7 @@
 
         // ポップアップを閉じるボタン
         $("#forum-popup .close").on("click", function () {
-            $("#forum-popup").hide(); // ポップアップを非表示
+            $("#forum-popup").hide(); // ポップアップを閉じる（非表示？）
         });
     });
 </script>

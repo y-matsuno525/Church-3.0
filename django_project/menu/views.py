@@ -7,8 +7,9 @@ from .forms import AnnotationForm,VerseQuestionForm,VerseAnswerForm
 #メニューを表示するだけ
 def menu(request):
 
-    #左側メニュー
-    #欲しいクエリセットを取得
+    #左側メニューを生成
+    #諸書のクエリセットを取得
+    #TODO:versionを左側メニューのセレクトボックスから選べるようにする(ajax)
     bible = Bible.objects.filter(version="JCO").first()
     books = Book.objects.filter(bible=bible)
 
@@ -19,21 +20,21 @@ def menu(request):
 
     return render(request,"menu/menu.html",params)
 
-# Ajaxによる聖書のVerse取得
+
+
+# 選択した書のVerseを取得(TODO:書の章ごとのページネーションをしたい)
+#menu.html から ,book_content.htmlを挿入
 def get_verses(request):
     # book_idを取得
     book_id = request.GET.get("book_id")
-
-    if not book_id:  # book_idが指定されていない場合
-        return JsonResponse({"error": "Book ID is required"}, status=400)
 
     try:
         # Bookの取得
         book = Book.objects.get(id=book_id)
     except Book.DoesNotExist:  # 存在しない場合のエラーハンドリング
-        return JsonResponse({"error": "Book not found"}, status=404)
+        return JsonResponse({"error": "書を取得できませんでした"}, status=404)
 
-    # Chapterおよび関連するVerseの取得
+    # ChapterとVerseの取得
     chapters = Chapter.objects.filter(book=book).order_by('chapter_number')
     chapter_data = []
 
@@ -41,11 +42,12 @@ def get_verses(request):
         verses = Verse.objects.filter(chapter=chapter).order_by('verse_number')
         chapter_data.append({
             "chapter_number": chapter.chapter_number,
+            #フィールドを選んで取得している。章を取得していないことに注意。（すべてのビューでこのように必要な情報を受け取るだけにしたほうがいい？）
             "verses": [{"verse_number": v.verse_number, "text": v.text, "id": v.id} for v in verses]
         })
 
-    # HTMLテンプレートをレンダリングして返す
-    html = render_to_string("menu/content.html", { #ajaxレスポンス用のhtml(content.html)を別で作ればいい。面白い！
+    # HTMLをレンダリングして返す
+    html = render_to_string("menu/book_content.html", { #ajaxレスポンス用のhtml(book_content.html)を別で作ればいい。面白い！
         "book": book,
         "chapter_data": chapter_data,
     })
@@ -54,29 +56,17 @@ def get_verses(request):
 
 
 
+#ある節の注釈を取得(TODO:プライベートな注釈が表示されないようにする)(TODO:エラーハンドリングいる？)
+#book_content.htmlから,verse_annotations.htmlをサブウィンドウで開く
 def get_verse_annotations(request):
-    try:
-        verse_id = request.GET.get("verse_id")
-        print(type(verse_id))
-        if not verse_id:
-            return JsonResponse({"error": "invalid Verse ID"}, status=400)
-        verse_id = int(verse_id)
-    except (TypeError, ValueError):
-        return JsonResponse({"error": "Invalid Verse ID"}, status=400)
+    
+    #節を取得
+    verse_id = request.GET.get("verse_id")
+    verse = Verse.objects.get(id=int(verse_id))
 
-    if not verse_id:  # Verse IDが指定されていない場合
-        return JsonResponse({"error": "Verse ID is required"}, status=400)
-
-    try:
-        #Verseを取得
-        verse = Verse.objects.get(id=verse_id)
-    except Verse.DoesNotExist:  # 該当するVerseが存在しない場合
-        return JsonResponse({"error": "Verse not found"}, status=404)
-
-    # Verseに関連する注釈を取得
+    #節に紐付いた注釈を取得（多分ここでプライベートな注釈をはじく）
     annotations = VerseAnnotation.objects.filter(verse=verse).order_by("-created_at")
 
-    # 掲示板内容をレンダリング
     html = render_to_string("menu/verse_annotations.html", {
         "verse": verse,
         "annotations": annotations,
@@ -87,6 +77,8 @@ def get_verse_annotations(request):
 
 
 
+#注釈を追加
+#verse_annotations.htmlから, 格納に成功したらサブウィンドウを閉じる
 def add_verse_annotation(request):
 
     if request.method == "POST":
@@ -116,14 +108,11 @@ def add_verse_annotation(request):
 
             #更新するためにもう一度レンダリング(get_verse_annotationsと同じロジック)
             annotations = VerseAnnotation.objects.filter(verse=verse).order_by("-created_at")
-            print(annotations)
             html = render_to_string("menu/update_verse_annotations.html", {
                 "verse": verse,
                 "annotations": annotations,
                 "form" : AnnotationForm(),
             }, request=request)
-
-            print(html)
 
             return JsonResponse({
                 "success": True,
@@ -132,15 +121,19 @@ def add_verse_annotation(request):
         else:
             return JsonResponse({
                 "success": False,
-                "message": "フォームにエラーがあります。",
+                "message": "フォームがおかしい",
                 "errors": form.errors
             })
     return JsonResponse({
         "success": False,
-        "message": "無効なリクエストです。"
+        "message": "リクエストがおかしい"
     })
 
-def verse_questions(request):
+
+
+#ある節に紐付けられた質問を取得(verse_questions.htmlに表示（新しいタブで開く）)
+#book_content.htmlから
+def get_verse_questions(request):
     verse_id = request.GET["id"]
     verse = get_object_or_404(Verse, id=verse_id)
     questions = VerseQuestion.objects.filter(verse=verse)
@@ -151,6 +144,10 @@ def verse_questions(request):
     }
     return render(request,"menu/verse_questions.html",params)
 
+
+
+#質問作成サブウィンドウに表示させるHTML(create_verse_question.html)を作成
+#verse_questions.htmlから, 
 def create_verse_question(request):
 
     verse_id = request.GET["verse_id"]
@@ -163,6 +160,10 @@ def create_verse_question(request):
 
     return JsonResponse({"html": html})
 
+
+
+#作成した質問をDBに格納
+#create_verse_question.htmlから
 def register_verse_question(request):
 
     if request.method == "POST":
@@ -191,7 +192,7 @@ def register_verse_question(request):
 
 #ある質問に紐付いた回答一覧を表示(あとで関数名変える。名前意味不明)
 #verse_questions.htmlから来て、ある質問に対する回答一覧を生成し、verse_questions.htmlへ送り返す
-def answer_verse_question(request):
+def verse_answers(request):
     question_id = request.GET.get("question_id")
     question_id = int(question_id)
 

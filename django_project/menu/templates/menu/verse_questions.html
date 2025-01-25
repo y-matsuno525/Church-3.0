@@ -27,7 +27,7 @@
                         <p>{{verse.text}}</p>
                         {% for question in questions %}
                             <p>{{question.content}}</p>
-                            <button class="AnswerQuestion" data-question-id="{{ question.id }}">答える</button>
+                            <button class="VerseAnswers" data-question-id="{{ question.id }}">答える</button>
                         {% endfor %}
                     </div>
                 </div>
@@ -87,16 +87,16 @@
                 });
             });
         
-            //質問投稿サブウィンドウを開く
+            //回答一覧をサブウィンドウで開く
             $(document).ready(function () {
-                $(".AnswerQuestion").on("click", function (e) {
+                $(".VerseAnswers").on("click", function (e) {
                     e.preventDefault(); // デフォルトの動作を無効化
         
-                    var questionId = $(this).data("question-id"); // Verse IDを取得
+                    var questionId = $(this).data("question-id"); // question IDを取得
         
-                    // Ajaxリクエストを送信して掲示板内容を取得
+                    // Ajaxリクエストを送信して回答一覧を取得
                     $.ajax({
-                        url: "{% url 'menu:answer_verse_question' %}", // 掲示板ビューのURL
+                        url: "{% url 'menu:verse_answers' %}", // 回答取得ビューのURL
                         method: "GET",
                         data: {
                             question_id: questionId
@@ -105,7 +105,7 @@
                             if (response.html) {
                             
                                 // 新しいサブウィンドウを作成
-                                var windowName = "AnswerVerseQuestionWindow_" + questionId;
+                                var windowName = "VerseAnswersWindow_" + questionId;
                                 var newWindow = window.open("", windowName, "width=600,height=400,scrollbars=yes,resizable=yes");
         
                                 // サブウィンドウにHTMLを挿入
