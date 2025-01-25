@@ -1,0 +1,22 @@
+<div>
+    <h3>Verse: {{ verse.text }}</h3>
+    <ul>
+        {% for annotation in annotations %}
+            <li>
+                <strong>{{ annotation.user }}</strong> ({{ annotation.created_at }}): 
+                <p>{{ annotation.content }}</p>
+            </li>
+        {% empty %}
+            <p>まだ投稿がありません。</p>
+        {% endfor %}
+    </ul>
+</div>
+{% if user.is_authenticated %}
+<form class='annotationForm' action="{% url 'menu:add_verse_annotation' %}" method="post">
+    {% csrf_token %}
+    {{form}}
+    <input type="hidden" name="verse_id" value="{{ verse.id }}">
+    <input type="submit" value="作成" class="btn btn-primary btn-dark">
+{% else %}
+    <p>注釈を作成するにはログインが必要です</p>
+{% endif %}

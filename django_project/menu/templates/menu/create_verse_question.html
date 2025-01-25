@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>質問作成</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .content {
+            padding: 20px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div id="annotationsContainer">
+        <div>
+            <h3>Verse: {{ verse.text }}</h3>
+        </div>
+        {% if user.is_authenticated %}
+            <form id="VerseQuestionForm_{{ verse.id }}" action="{% url 'menu:register_verse_question' %}" method="post">
+                {% csrf_token %}
+                <textarea name="content" required placeholder="質問内容を入力してください" class="form-control"></textarea>
+                <input type="hidden" name="verse_id" value="{{ verse.id }}">
+                <input type="submit" value="作成" class="btn btn-primary btn-dark">
+            </form>
+        {% else %}
+            <p>質問を作成するにはログインが必要です。</p>
+        {% endif %}
+    </div>
+    <script>
+        $(document).ready(function () {
+            // フォームIDを特定してイベントをバインド
+            const formId = "#VerseQuestionForm_{{ verse.id }}"; // 動的にフォームIDを作成
+            $(formId).on("submit", function (e) {
+                e.preventDefault(); // デフォルト送信を無効化
+
+                const formData = $(this).serialize(); // フォームデータをシリアライズ
+
+                // Ajaxでフォームを送信
+                $.ajax({
+                    url: $(this).attr("action"),
+                    method: "POST",
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            //alert(response.message); // 成功メッセージを表示
+                            window.close(); // サブウィンドウを閉じる
+                        } else {
+                            alert(response.message); // エラーメッセージを表示
+                        }
+                    },
+                    error: function () {
+                        alert("サーバーとの通信中にエラーが発生しました。");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

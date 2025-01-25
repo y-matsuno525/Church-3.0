@@ -1,30 +1,37 @@
-{% load static %}
 {% load django_bootstrap5 %}
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>church 3.0</title>
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-    {% block extraheader %}{% endblock %}
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-    <!-- 上部ナビゲーションバー -->
-    <nav class="navbar navbar-expand flex-md-row navbar-dark bg-dark">
-        <div class="container d-flex justify-content-between">
-            <a href="/menu/" class="navbar-brand">church 3.0</a>
-        </div>
-    </nav>
 
-    
-    
-            <!-- メインコンテンツエリア -->
-            <main class="col-md-10 ml-sm-auto px-4">
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>church 3.0</title>
+        <!--デバイスごとの表示領域を設定（端末に合わせる、ズームを許可）-->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+    </head>
+    <body>
+        <!-- 上部ナビゲーションバー -->
+        <nav class="navbar navbar-expand flex-md-row navbar-dark bg-dark">
+            <div class="container d-flex justify-content-between">
+                <a href="/menu/" class="navbar-brand">church 3.0</a>
+            </div>
+            <ul class="navbar-nav mr-md-2">
+                {% if user.is_authenticated %}
+                <form action='{% url "logout" %}' method='post' name='logout'>
+                    {% csrf_token %}
+                    <li class="nav-item"><a class="nav-link" href="javascript:logout.submit()">ログアウト</a></li>
+                </form>
+                {% else %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">ログイン</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">登録</a></li>
+                {% endif %}
+            </ul>
+        </nav> 
+        <main>
+            <div class="container">
                 {% block main %}{% endblock %}
-            </main>
-        </div>
-    </div>
-    
-</body>
+            </div>
+        </main>
+    </body>
 </html>

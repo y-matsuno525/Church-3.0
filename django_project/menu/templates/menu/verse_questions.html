@@ -1,0 +1,144 @@
+{% load django_bootstrap5 %}
+
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>Q_{{verse.chapter.book.name}}_{{verse.chapter.chapter_number}}:{{verse.verse_number}}</title>
+        <!--デバイスごとの表示領域を設定（端末に合わせる、ズームを許可）-->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+    </head>
+    <body>
+        <div class="container my-5">
+            <div class="row">
+                <!-- メインコンテンツ -->
+                <div class="col-md-10">
+                    <div id="main-content">
+                        <div class="text-center mb-4">
+                            <h1 class="display-5 fw-bold">質問一覧</h1>
+                        </div>
+                        {% if user.is_authenticated %}
+                            <button class="createQuestion" data-verse-id="{{ verse.id }}">質問する</button>
+                        {% else %}
+                            <p>質問するにはログインが必要です</p>
+                        {% endif %}
+                        <p>{{verse.text}}</p>
+                        {% for question in questions %}
+                            <p>{{question.content}}</p>
+                            <button class="AnswerQuestion" data-question-id="{{ question.id }}">答える</button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+            //質問投稿サブウィンドウを開く
+            $(document).ready(function () {
+                $(".createQuestion").on("click", function (e) {
+                    e.preventDefault(); // デフォルトの動作を無効化
+        
+                    var verseId = $(this).data("verse-id"); // Verse IDを取得
+        
+                    // Ajaxリクエストを送信して掲示板内容を取得
+                    $.ajax({
+                        url: "{% url 'menu:create_verse_question' %}", // 掲示板ビューのURL
+                        method: "GET",
+                        data: {
+                            verse_id: verseId
+                        },
+                        success: function (response) {
+                            if (response.html) {
+                            
+                                // 新しいサブウィンドウを作成
+                                var windowName = "CreateVerseQuestionWindow_" + verseId;
+                                var newWindow = window.open("", windowName, "width=600,height=400,scrollbars=yes,resizable=yes");
+        
+                                // サブウィンドウにHTMLを挿入
+                                newWindow.document.open();
+                                newWindow.document.write(response.html); //response.htmlは完全なHTML構造
+                                newWindow.document.close();
+
+                                // サブウィンドウの閉じるイベントを監視
+                                const timer = setInterval(() => {
+                                    if (newWindow && newWindow.closed) {
+                                        clearInterval(timer); // タイマーを停止
+                                        //alert("サブウィンドウが閉じられました。親ウィンドウをリロードします。");
+                                        window.location.reload(); // 親ウィンドウをリロード
+                                    }
+                                }, 500); // 500msごとにチェック
+                            } else {
+                                alert("質問作成ウィンドウが開けません");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("エラーが発生しました:", error);
+                            console.error("レスポンス:", xhr.responseText);
+                            alert("質問作成ウィンドウが開けません");
+                        }
+                    });
+                });
+        
+                // ポップアップを閉じるボタン
+                $("#forum-popup .close").on("click", function () {
+                    $("#forum-popup").hide(); // ポップアップを非表示
+                });
+            });
+        
+            //質問投稿サブウィンドウを開く
+            $(document).ready(function () {
+                $(".AnswerQuestion").on("click", function (e) {
+                    e.preventDefault(); // デフォルトの動作を無効化
+        
+                    var questionId = $(this).data("question-id"); // Verse IDを取得
+        
+                    // Ajaxリクエストを送信して掲示板内容を取得
+                    $.ajax({
+                        url: "{% url 'menu:answer_verse_question' %}", // 掲示板ビューのURL
+                        method: "GET",
+                        data: {
+                            question_id: questionId
+                        },
+                        success: function (response) {
+                            if (response.html) {
+                            
+                                // 新しいサブウィンドウを作成
+                                var windowName = "AnswerVerseQuestionWindow_" + questionId;
+                                var newWindow = window.open("", windowName, "width=600,height=400,scrollbars=yes,resizable=yes");
+        
+                                // サブウィンドウにHTMLを挿入
+                                newWindow.document.open();
+                                newWindow.document.write(response.html); //response.htmlは完全なHTML構造
+                                newWindow.document.close();
+
+                                // サブウィンドウの閉じるイベントを監視
+                                const timer = setInterval(() => {
+                                    if (newWindow && newWindow.closed) {
+                                        clearInterval(timer); // タイマーを停止
+                                        //alert("サブウィンドウが閉じられました。親ウィンドウをリロードします。");
+                                        window.location.reload(); // 親ウィンドウをリロード
+                                    }
+                                }, 500); // 500msごとにチェック
+                            } else {
+                                alert("回答作成ウィンドウが開けません");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("エラーが発生しました:", error);
+                            console.error("レスポンス:", xhr.responseText);
+                            alert("回答作成ウィンドウが開けません");
+                        }
+                    });
+                });
+        
+                // ポップアップを閉じるボタン
+                $("#forum-popup .close").on("click", function () {
+                    $("#forum-popup").hide(); // ポップアップを非表示
+                });
+            });
+        </script>
+        
+    </body>
+</html>

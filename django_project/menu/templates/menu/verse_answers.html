@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>回答一覧</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="answersContainer">
+            <div>
+                <h3>{{ question.verse.text }}</h3>
+                <h3>質問: {{ question.content }}</h3>
+                <ul>
+                    {% for answer in answers %}
+                        <li>
+                            <strong>{{ answer.user }}</strong> ({{ answer.created_at }}): 
+                            <p>{{ answer.content }}</p>
+                        </li>
+                    {% empty %}
+                        <p>まだ回答がありません。</p>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% if user.is_authenticated %}
+            <form class='answerForm' action="{% url 'menu:add_verse_answer' %}" method="post">
+                {% csrf_token %}
+                {{form}}
+                <input type="hidden" name="question_id" value="{{ question.id }}">
+                <input type="submit" value="回答" class="btn btn-primary btn-dark">
+            {% else %}
+                <p>回答するにはログインが必要です</p>
+            {% endif %}
+        </div>
+    </body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'verse_answers.js' %}"></script>

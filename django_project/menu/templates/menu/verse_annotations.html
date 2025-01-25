@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>掲示板</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="annotationsContainer">
+            <div>
+                <h3>Verse: {{ verse.text }}</h3>
+                <ul>
+                    {% for annotation in annotations %}
+                        <li>
+                            <strong>{{ annotation.user }}</strong> ({{ annotation.created_at }}): 
+                            <p>{{ annotation.content }}</p>
+                        </li>
+                    {% empty %}
+                        <p>まだ投稿がありません。</p>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% if user.is_authenticated %}
+            <form class='annotationForm' action="{% url 'menu:add_verse_annotation' %}" method="post">
+                {% csrf_token %}
+                {{form}}
+                <input type="hidden" name="verse_id" value="{{ verse.id }}">
+                <input type="submit" value="作成" class="btn btn-primary btn-dark">
+            {% else %}
+                <p>注釈を作成するにはログインが必要です</p>
+            {% endif %}
+        </div>
+    </body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'verse_annotations.js' %}"></script>

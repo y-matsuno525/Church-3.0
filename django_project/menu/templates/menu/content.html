@@ -7,10 +7,69 @@
                 {% for verse in chapter.verses %}
                     <li>
                         <strong>{{ verse.verse_number }}</strong>: {{ verse.text }}
-                        <button class="forum-button" data-verse-id="{{ verse.id }}">掲示板を表示</button>
+                        <button class="forum-button" data-verse-id="{{ verse.id }}">注釈</button>
+                        <button id="openQuestions_{{verse.id}}">Q&amp;A</button>
+                        <script>
+                            document.getElementById("openQuestions_{{verse.id}}").addEventListener("click",function(){
+                                window.open("{% url 'menu:verse_questions' %}?id={{verse.id}}", "_blank");
+                            });
+                        </script>
                     </li>
                 {% endfor %}
             </ul>
         </div>
     {% endfor %}
 </div>
+
+<!--掲示板ポップアップ表示-->
+<div id="forum-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border: 1px solid black; padding: 20px; z-index: 1000;">
+    <button class="close" style="position: absolute; top: 10px; right: 10px;">閉じる</button>
+    <div class="content">
+        <!-- 掲示板の内容がここに挿入される -->
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".forum-button").on("click", function (e) {
+            e.preventDefault(); // デフォルトの動作を無効化
+
+            var verseId = $(this).data("verse-id"); // Verse IDを取得
+
+            // Ajaxリクエストを送信して掲示板内容を取得
+            $.ajax({
+                url: "{% url 'menu:get_verse_annotations' %}", // 掲示板ビューのURL
+                method: "GET",
+                data: {
+                    verse_id: verseId
+                },
+                success: function (response) {
+                    if (response.html) {
+                    
+                        // 新しいサブウィンドウを作成
+                        var windowName = "AnnotationsWindow_" + verseId;
+                        var newWindow = window.open("", windowName, "width=600,height=400,scrollbars=yes,resizable=yes");
+
+                        // サブウィンドウにHTMLを挿入
+                        newWindow.document.open();
+                        newWindow.document.write(response.html); // response.html に完全なHTML構造を含む
+                        newWindow.document.close();
+                    } else {
+                        alert("掲示板の内容を取得できませんでした。");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("エラーが発生しました:", error);
+                    console.error("レスポンス:", xhr.responseText);
+                    alert("掲示板の内容を取得できませんでした。");
+                }
+            });
+        });
+
+        // ポップアップを閉じるボタン
+        $("#forum-popup .close").on("click", function () {
+            $("#forum-popup").hide(); // ポップアップを非表示
+        });
+    });
+</script>
