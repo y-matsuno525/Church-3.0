@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django_bootstrap5",
     "menu",
     "accounts.apps.AccountsConfig",
+    "search",
 ]
 
 MIDDLEWARE = [

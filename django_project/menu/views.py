@@ -27,6 +27,7 @@ def menu(request):
 def get_verses(request):
     # book_idを取得
     book_id = request.GET.get("book_id")
+    chapter_number = request.GET.get("chapter_number", 1)
 
     try:
         # Bookの取得
@@ -35,21 +36,18 @@ def get_verses(request):
         return JsonResponse({"error": "書を取得できませんでした"}, status=404)
 
     # ChapterとVerseの取得
-    chapters = Chapter.objects.filter(book=book).order_by('chapter_number')
-    chapter_data = []
+    chapter = Chapter.objects.get(book=book,chapter_number=chapter_number)
 
-    for chapter in chapters:
-        verses = Verse.objects.filter(chapter=chapter).order_by('verse_number')
-        chapter_data.append({
-            "chapter_number": chapter.chapter_number,
-            #フィールドを選んで取得している。章を取得していないことに注意。（すべてのビューでこのように必要な情報を受け取るだけにしたほうがいい？）
-            "verses": [{"verse_number": v.verse_number, "text": v.text, "id": v.id} for v in verses]
-        })
+    all_chapters = Chapter.objects.filter(book=book).order_by('chapter_number')
+
+    verses = Verse.objects.filter(chapter=chapter).order_by('verse_number')
 
     # HTMLをレンダリングして返す
     html = render_to_string("menu/book_content.html", { #ajaxレスポンス用のhtml(book_content.html)を別で作ればいい。面白い！
         "book": book,
-        "chapter_data": chapter_data,
+        "chapter": chapter,
+        "verses": verses,
+        "all_chapters": all_chapters,
     })
 
     return JsonResponse({"html": html})

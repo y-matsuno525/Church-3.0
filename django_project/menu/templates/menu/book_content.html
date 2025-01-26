@@ -1,25 +1,64 @@
-<div>
+{% load static %}
+<div id="content-container" data-ajax-url="{% url 'menu:get_verses' %}" data-book-id="{{ book.id }}">
+    <!-- 書名と章情報 -->
     <h2>{{ book.name }}</h2>
-    {% for chapter in chapter_data %}
-        <div class="chapter">
-            <h3>第 {{ chapter.chapter_number }} 章</h3>
-            <ul>
-                {% for verse in chapter.verses %}
-                    <li>
-                        <strong>{{ verse.verse_number }}</strong>: {{ verse.text }}
-                        <button class="forum-button" data-verse-id="{{ verse.id }}">注釈</button>
-                        <button id="openQuestions_{{verse.id}}">Q&amp;A</button>
-                        <script>
-                            document.getElementById("openQuestions_{{verse.id}}").addEventListener("click",function(){
-                                window.open("{% url 'menu:get_verse_questions' %}?id={{verse.id}}", "_blank");
-                            });
-                        </script>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endfor %}
+    <h3>第 {{ chapter.chapter_number }} 章</h3>
+
+    <!-- ページ送りとセレクトボックス -->
+    <div class="pagination">
+        {% if chapter.previous_chapter %}
+            <button class="pagination-button" data-chapter-number="{{ chapter.previous_chapter.chapter_number }}">前の章</button>
+        {% endif %}
+
+        <select class="chapter-selector">
+            {% for ch in all_chapters %}
+                <option value="{{ ch.chapter_number }}" {% if ch.chapter_number == chapter.chapter_number %}selected{% endif %}>
+                    第 {{ ch.chapter_number }} 章
+                </option>
+            {% endfor %}
+        </select>
+
+        {% if chapter.next_chapter %}
+            <button class="pagination-button" data-chapter-number="{{ chapter.next_chapter.chapter_number }}">次の章</button>
+        {% endif %}
+    </div>
+
+    <!-- 節のリスト -->
+    <ul class="verses">
+        {% for verse in verses %}
+            <li>
+                <button class="forum-button" data-verse-id="{{ verse.id }}">注</button>
+                <button id="openQuestions_{{verse.id}}">Q</button>
+                <script>
+                    document.getElementById("openQuestions_{{verse.id}}").addEventListener("click", function () {
+                        window.open("{% url 'menu:get_verse_questions' %}?id={{verse.id}}", "_blank");
+                    });
+                </script>
+                <strong>{{ verse.verse_number }}</strong>: {{ verse.text }}     
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- ページ送り（再表示用） -->
+    <div class="pagination">
+        {% if chapter.previous_chapter %}
+            <button class="pagination-button" data-chapter-number="{{ chapter.previous_chapter.chapter_number }}">前の章</button>
+        {% endif %}
+
+        <select class="chapter-selector">
+            {% for ch in all_chapters %}
+                <option value="{{ ch.chapter_number }}" {% if ch.chapter_number == chapter.chapter_number %}selected{% endif %}>
+                    第 {{ ch.chapter_number }} 章
+                </option>
+            {% endfor %}
+        </select>
+
+        {% if chapter.next_chapter %}
+            <button class="pagination-button" data-chapter-number="{{ chapter.next_chapter.chapter_number }}">次の章</button>
+        {% endif %}
+    </div>
 </div>
+
 
 
 
@@ -34,6 +73,7 @@
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'verse_pagination.js' %}"></script>
 <script>
     $(document).ready(function () {
         $(".forum-button").on("click", function (e) {

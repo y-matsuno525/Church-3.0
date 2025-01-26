@@ -26,6 +26,12 @@ class Chapter(models.Model):
 
     def __str__(self):
         return f"{self.book.name} Chapter {self.chapter_number}"
+    
+    def previous_chapter(self):
+        return Chapter.objects.filter(book=self.book, chapter_number__lt=self.chapter_number).order_by('-chapter_number').first()
+
+    def next_chapter(self):
+        return Chapter.objects.filter(book=self.book, chapter_number__gt=self.chapter_number).order_by('chapter_number').first()
 
 class Verse(models.Model):
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)

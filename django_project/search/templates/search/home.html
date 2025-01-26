@@ -1,0 +1,42 @@
+{% load django_bootstrap5 %}
+
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>検索</title>
+        <!--デバイスごとの表示領域を設定（端末に合わせる、ズームを許可）-->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+    </head>
+    <body>
+        <!-- 上部ナビゲーションバー -->
+        <nav class="navbar navbar-expand flex-md-row navbar-dark bg-dark">
+            <div class="container d-flex justify-content-between">
+                <a href="/menu/" class="navbar-brand">church 3.0</a>
+            </div>
+            <ul class="navbar-nav mr-md-2">
+                {% if user.is_authenticated %}
+                <form action='{% url "logout" %}' method='post' name='logout'>
+                    {% csrf_token %}
+                    <li class="nav-item"><a class="nav-link" href="javascript:logout.submit()">ログアウト</a></li>
+                </form>
+                {% else %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">ログイン</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">登録</a></li>
+                {% endif %}
+            </ul>
+        </nav> 
+        <div class="col-md-10">
+            <div id="main-content">
+                <div class="text-center mb-4">
+                    <h1 class="display-5 fw-bold">検索</h1>
+                </div>
+            </div>
+        </div>
+        <div>
+            検索フォーム
+        </div>
+    </body>
+</html>
